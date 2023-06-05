@@ -39,9 +39,9 @@ if __name__ == "__main__":
             box = Box(
                 position_on_ground[0],
                 position_on_ground[2],
-                label[2],
-                label[3],
-                label[4],
+                label[2], # width
+                label[3], # height
+                label[4], # length
             )
             # print(label)
             img = box.project(img, to_world_from_camera, K)
