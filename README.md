@@ -1,6 +1,42 @@
-# 3d_bbox_highway
+# 3D bounding box tracking on highway
 
-# Camera calibration
+Let's suppose that you want to detect all types of vehicles on a highway from a camera located on a bridge. The goal of this project is to detect them while estimating their dimensions and not to detect any type of vehicles (car, truck, van etc). 
+
+The main problem to do it with a monocular camera, in comparison to RGB camera or LiDAR, is to regress 3D dimensions from 2D image. Moreover, obtaining a groundtruth of a real-life record requires huge means. This is why I decided to use the Carla simulator to build up my dataset where the bounding box dimensions are perfectly known.
+
+Once the training is done, you can track cars individually and generate statistics on it (averaged speed, dimensions distributions...).
+
+My contribution has 4 components:
+- a [camera calibration algorithm](#camera-calibration) to find camera pose above the highway
+- a python script to interact with Carla simulator and generate a [groundtruth](annotation/README.md)
+- a [Centernet-based network](centernet-3d-bbox.ipynb) to regress positions and dimensions
+- a tracking algorithm with a Kalman Filter
+
+<p>
+<em>Tracking on Carla simulation</em></br>
+<img src="res/tracking_carla.png"  width="600" alt>
+</p>
+
+<p>
+<em>Tracking on Highway</em></br>
+<img src="res/tracking_periph.png"  width="600" alt>
+</p>
+
+[YouTube video link](https://youtu.be/3leAX-MhMQE)
+
+## Inference
+
+For detection only
+```
+python multi_object_detection.py path/to/video.mp4 centernet-3d-bbox.pth --conf 0.2
+```
+
+For full tracking:
+```
+python multi_object_tracking.py path/to/video.mp4 centernet-3d-bbox.pth --conf 0.2
+```
+
+## Camera calibration
 
 Let's suppose that your instrinc camera matrix was already estimated with a checkerboard.
 
@@ -11,7 +47,7 @@ Now we want to estimate the camera pose (position + orientation) in the world re
 <img src="res/lane_detection.png"  width="600" alt>
 </p>
 
-## Pitch and yaw estimate
+### Pitch and yaw estimate
 
 $\alpha$ = pitch
 
@@ -135,7 +171,7 @@ $$
 \beta = (x - c_x) {\cos \alpha \over f}
 $$
 
-## Translation estimation
+### Translation estimation
 
 For this, we consider the points of each lane at the bottom of our image. We fix our origin by declaring that those points have $Z_w = 0$. We still consider that $\beta \approx 0$.
 
@@ -213,7 +249,7 @@ t_z
 (A^T A)^{-1} A^T b
 ```
 
-## Results
+### Results
 
 You can check the results visually:
 
